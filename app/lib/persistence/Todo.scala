@@ -27,6 +27,17 @@ case class TodoRepository[P <: JdbcProfile]()(implicit val driver: P)
       .result.headOption
   }
 
+  def getAll(): Future[Seq[EntityEmbeddedId]] =
+    RunDBAction(TodoTable, "slave") { _
+      .result
+  }
+
+  def getAllYouNeed(): Future[Seq[(Long, String, String)]] = 
+    RunDBAction(TodoTable, "slave") { _
+      .map(todo => (todo.category_id, todo.title, todo.body))
+      .result
+  }
+
   /**
     * Add Todo Data
    */
