@@ -32,11 +32,17 @@ case class TodoRepository[P <: JdbcProfile]()(implicit val driver: P)
       .result
   }
 
-  def getAllYouNeed(): Future[Seq[(Long, String, String)]] = 
+  def getAllYouNeed(): Future[Seq[(Long, String, String, lib.model.Todo.Status)]] = 
+    RunDBAction(TodoTable, "slave") { _
+      .map(todo => (todo.category_id, todo.title, todo.body, todo.state))
+      .result
+  }
+
+  def getAllYouNeedExceptStatus(): Future[Seq[(Long, String, String)]] = 
     RunDBAction(TodoTable, "slave") { _
       .map(todo => (todo.category_id, todo.title, todo.body))
       .result
-  }
+    }
 
   /**
     * Add Todo Data

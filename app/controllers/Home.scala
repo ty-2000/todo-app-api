@@ -34,7 +34,10 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
         val f = TodoRepository.get(Todo.Id(id.get))
         Await.ready(f, Duration.Inf)
       } else {
-        val f = TodoRepository.getAllYouNeed()
+        val f = TodoRepository.getAllYouNeedExceptStatus()
+
+        // Failureが帰ってくる
+        // val f = TodoRepository.getAllYouNeed()
         Await.ready(f, Duration.Inf)
       }
     Ok(result.toString)
