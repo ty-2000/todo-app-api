@@ -25,12 +25,12 @@ case class Todo(
 
 import  TodoCategory._
 case class TodoCategory(
-  id:           Option[Id], 
-  name:         String, 
-  slug:         String, 
-  categoryColor:Color, 
-  updatedAt:    LocalDateTime = NOW, 
-  createdAt:    LocalDateTime = NOW
+  id:             Option[Id], 
+  name:           String, 
+  slug:           String, 
+  categoryColor:  Color, 
+  updatedAt:      LocalDateTime = NOW, 
+  createdAt:      LocalDateTime = NOW
 ) extends EntityModel[Id]
 
 // コンパニオンオブジェクト

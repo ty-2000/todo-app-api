@@ -32,6 +32,9 @@ case class TodoTable[P <: JdbcProfile]()(implicit val driver: P)
 
   // Definition of Table
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+  val todoCategory = TodoCategoryTable().query
+
   class Table(tag: Tag) extends BasicTable(tag, "to_do") {
     import Todo._
     // Columns
@@ -42,6 +45,8 @@ case class TodoTable[P <: JdbcProfile]()(implicit val driver: P)
     /* @5 */ def state        = column[Status]        ("state",       O.UInt8)
     /* @6 */ def updatedAt    = column[LocalDateTime] ("updated_at",  O.TsCurrent)
     /* @7 */ def createdAt    = column[LocalDateTime] ("created_at",  O.Ts)
+
+    /*    */ def category = todoCategory.filter(_.id === TodoCategory.Id(1))
 
     type TableElementTuple = (
       Option[Id], Long, String, String, Status, LocalDateTime, LocalDateTime
@@ -70,8 +75,8 @@ case class TodoCategoryTable[P <: JdbcProfile]()(implicit val driver: P)
   // Definition of DataSourceName
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   lazy val dsn = Map(
-    "master" -> DataSourceName("ixias.db.mysql://master/to_do_category"),
-    "slave"  -> DataSourceName("ixias.db.mysql://slave/to_do_category")
+    "master" -> DataSourceName("ixias.db.mysql://master/to_do"),
+    "slave"  -> DataSourceName("ixias.db.mysql://slave/to_do")
   )
 
   // Definition of Query
@@ -87,7 +92,7 @@ case class TodoCategoryTable[P <: JdbcProfile]()(implicit val driver: P)
     /* @1 */ def id            = column[Id]            ("id",              O.UInt64, O.PrimaryKey, O.AutoInc)
     /* @3 */ def name          = column[String]        ("name",            O.Utf8Char255)
     /* @4 */ def slug          = column[String]        ("slug",            O.Utf8Char255)
-    /* @5 */ def categoryColor = column[Color]         ("category_color",  O.UInt8)
+    /* @5 */ def color         = column[Color]         ("color",  O.UInt8)
     /* @6 */ def updatedAt     = column[LocalDateTime] ("updated_at",      O.TsCurrent)
     /* @7 */ def createdAt     = column[LocalDateTime] ("created_at",      O.Ts)
 
@@ -96,7 +101,7 @@ case class TodoCategoryTable[P <: JdbcProfile]()(implicit val driver: P)
     )
 
     // DB <=> Scala の相互のmapping定義
-    def * = (id.?, name, slug, categoryColor, updatedAt, createdAt) <> (
+    def * = (id.?, name, slug, color, updatedAt, createdAt) <> (
       // Tuple(table) => Model
       (t: TableElementTuple) => TodoCategory(
         t._1, t._2, t._3, t._4, t._5, t._6
