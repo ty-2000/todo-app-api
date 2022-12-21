@@ -7,7 +7,7 @@
 @(vv: model.ViewValueTodo)
 @common.Default(vv){
   @for(todoTuple <- vv.todoSeq){
-    <h3>@todoTuple._1</h3>
+    <h3><font color=@todoTuple._5.name>@todoTuple._1</font></h3>
     <p>@todoTuple._2</p>
     <p>@todoTuple._3.name</p>
     <p>@todoTuple._4</p>
