@@ -35,40 +35,16 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     Ok(views.html.Home(vv))
   }
 
-  def getTodo(id: Option[Int]) = Action { implicit req => 
-    val result = 
-      if(id.isDefined) {
-        val f = for {
-          todo <- TodoRepository.get(Todo.Id(id.get))
-          cate <- TodoCategoryRepository.get(TodoCategory.Id(todo.get.v.category_id))
-        } yield {
-          (todo.get.v.title, todo.get.v.body, todo.get.v.state, cate.get.v.name)
-        }
-        Await.ready(f, Duration.Inf)
-
-      } else {
-        val f = for {
-            todoSeq <- TodoRepository.getAll()
-            cateSeq <- TodoCategoryRepository.getAll()
-        } yield {
-          todoSeq.map(todo =>
-            (todo.v.title, todo.v.body, todo.v.state, cateSeq.find(cate => cate.v.id.get == TodoCategory.Id(todo.v.category_id)).get.v.name)
-          )
-        }
-        Await.ready(f, Duration.Inf)
-      }
-    Ok(result.toString)
-  }
-
-  def getTodoOnly() = Action { implicit req => 
-    val f = TodoRepository.getAll()
-    val result = Await.ready(f, Duration.Inf)
-    Ok(result.toString)
-  }
-
-  def getTodoCategory() = Action { implicit req => 
-    val f = TodoCategoryRepository.getAll()
-    val result = Await.ready(f, Duration.Inf)
+  def getTodoList() = Action { implicit req => 
+    val getTodoListFuture: Future[Seq[(String, String, lib.model.Todo.Status, String)]] = for {
+        todoSeq <- TodoRepository.getAll()
+        cateSeq <- TodoCategoryRepository.getAll()
+    } yield {
+      todoSeq.map(todo =>
+        (todo.v.title, todo.v.body, todo.v.state, cateSeq.find(cate => cate.v.id.get == TodoCategory.Id(todo.v.category_id)).get.v.name)
+      )
+    }
+    val result = Await.ready(getTodoListFuture, Duration.Inf)
     Ok(result.toString)
   }
 }
