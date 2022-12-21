@@ -47,7 +47,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
         cateSeq <- TodoCategoryRepository.getAll()
     } yield {
       todoSeq.map(todo => {
-          val category = cateSeq.find(cate => cate.v.id.get == TodoCategory.Id(todo.v.category_id)).get
+          val category = cateSeq.find(cate => cate.v.id.get == TodoCategory.Id(todo.v.categoryId)).get
           (todo.v.title, todo.v.body, todo.v.state, category.v.name, category.v.color)
         }
       )

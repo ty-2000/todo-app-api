@@ -39,7 +39,7 @@ case class TodoTable[P <: JdbcProfile]()(implicit val driver: P)
     import Todo._
     // Columns
     /* @1 */ def id           = column[Id]            ("id",          O.UInt64, O.PrimaryKey, O.AutoInc)
-    /* @2 */ def category_id  = column[Long]          ("category_id", O.UInt64)
+    /* @2 */ def categoryId   = column[Long]          ("category_id", O.UInt64)
     /* @3 */ def title        = column[String]        ("title",       O.Utf8Char255)
     /* @4 */ def body         = column[String]        ("body",        O.Utf8Char255)
     /* @5 */ def state        = column[Status]        ("state",       O.UInt8)
@@ -51,7 +51,7 @@ case class TodoTable[P <: JdbcProfile]()(implicit val driver: P)
     )
 
     // DB <=> Scala の相互のmapping定義
-    def * = (id.?, category_id, title, body, state, updatedAt, createdAt) <> (
+    def * = (id.?, categoryId, title, body, state, updatedAt, createdAt) <> (
       // Tuple(table) => Model
       (t: TableElementTuple) => Todo(
         t._1, t._2, t._3, t._4, t._5, t._6, t._7
