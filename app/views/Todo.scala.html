@@ -1,0 +1,15 @@
+@*
+ *
+ * to do sample project
+ *
+ *@
+
+@(vv: model.ViewValueTodo)
+@common.Default(vv){
+  @for(todoTuple <- vv.todoSeq){
+    <h3>@todoTuple._1</h3>
+    <p>@todoTuple._2</p>
+    <p>@todoTuple._3.name</p>
+    <p>@todoTuple._4</p>
+  }
+}

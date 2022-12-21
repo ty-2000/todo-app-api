@@ -7,15 +7,21 @@
 package controllers
 
 // Futureを使えるようにimport
-import scala.concurrent.Future
+import scala.concurrent._
 
 // おまじないだと思って無視してください
 import scala.concurrent.ExecutionContext.Implicits.global
+
+
+import scala.util.Success
+import scala.util.Failure
+
 
 import javax.inject._
 import play.api.mvc._
 
 import model.ViewValueHome
+import model.ViewValueTodo
 
 import lib.persistence.onMySQL._
 import lib.model.Todo
@@ -36,15 +42,28 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   }
 
   def getTodoList() = Action { implicit req => 
-    val getTodoListFuture: Future[Seq[(String, String, lib.model.Todo.Status, String)]] = for {
+    val getTodoListFuture: Future[Seq[(String, String, lib.model.Todo.Status, String, lib.model.TodoCategory.Color)]] = for {
         todoSeq <- TodoRepository.getAll()
         cateSeq <- TodoCategoryRepository.getAll()
     } yield {
-      todoSeq.map(todo =>
-        (todo.v.title, todo.v.body, todo.v.state, cateSeq.find(cate => cate.v.id.get == TodoCategory.Id(todo.v.category_id)).get.v.name)
+      todoSeq.map(todo => {
+          val category = cateSeq.find(cate => cate.v.id.get == TodoCategory.Id(todo.v.category_id)).get
+          (todo.v.title, todo.v.body, todo.v.state, category.v.name, category.v.color)
+        }
       )
     }
     val result = Await.ready(getTodoListFuture, Duration.Inf)
-    Ok(result.toString)
+
+    val vv = ViewValueTodo(
+      title   = "Todo一覧", 
+      cssSrc  = Seq("main.css"), 
+      jsSrc   = Seq("main.js"), 
+      todoSeq = result.value.get match {
+        case Success(v) => v
+        case Failure(e) => Seq()
+      }
+    )
+    println(vv)
+    Ok(views.html.Todo(vv))
   }
 }

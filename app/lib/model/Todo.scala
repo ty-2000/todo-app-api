@@ -28,7 +28,7 @@ case class TodoCategory(
   id:             Option[Id], 
   name:           String, 
   slug:           String, 
-  categoryColor:  Color, 
+  color:          Color, 
   updatedAt:      LocalDateTime = NOW, 
   createdAt:      LocalDateTime = NOW
 ) extends EntityModel[Id]
@@ -75,19 +75,19 @@ object TodoCategory {
   //~~~~~~~~~~~~~~~~~
   sealed abstract class Color(val code: Short, val name: String) extends EnumStatus
   object Color extends EnumStatus.Of[Color] {
-    case object TODO        extends Color(code = 1, name = "red")
-    case object IN_PROGRESS extends Color(code = 2, name = "blue")
-    case object DONE        extends Color(code = 3, name = "breen")
+    case object RED        extends Color(code = 1, name = "red")
+    case object BLUE       extends Color(code = 2, name = "blue")
+    case object GREEN      extends Color(code = 3, name = "green")
   }
 
   // INSERT時のIDがAutoincrementのため,IDなしであることを示すオブジェクトに変換
-  def apply(name: String, slug: String, categoryColor: Color): WithNoId = {
+  def apply(name: String, slug: String, color: Color): WithNoId = {
     new Entity.WithNoId(
       new TodoCategory(
         id          = None,
         name        = name, 
         slug        = slug, 
-        categoryColor = categoryColor, 
+        color       = color, 
       )
     )
   }
