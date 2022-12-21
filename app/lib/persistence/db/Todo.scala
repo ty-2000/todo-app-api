@@ -46,8 +46,6 @@ case class TodoTable[P <: JdbcProfile]()(implicit val driver: P)
     /* @6 */ def updatedAt    = column[LocalDateTime] ("updated_at",  O.TsCurrent)
     /* @7 */ def createdAt    = column[LocalDateTime] ("created_at",  O.Ts)
 
-    /*    */ def category = todoCategory.filter(_.id === TodoCategory.Id(1))
-
     type TableElementTuple = (
       Option[Id], Long, String, String, Status, LocalDateTime, LocalDateTime
     )

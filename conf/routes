@@ -6,6 +6,8 @@
 # An example controller showing a sample home page
 GET     /                             controllers.HomeController.index
 GET     /todo                         controllers.HomeController.getTodo(id: Option[Int])
+GET     /todo/category                controllers.HomeController.getTodoCategory
+GET     /todo/only                    controllers.HomeController.getTodoOnly()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
