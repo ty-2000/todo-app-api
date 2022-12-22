@@ -6,13 +6,8 @@
 
 package controllers
 
-// Futureを使えるようにimport
 import scala.concurrent._
-
-// おまじないだと思って無視してください
 import scala.concurrent.ExecutionContext.Implicits.global
-
-
 import scala.util.Success
 import scala.util.Failure
 
@@ -22,6 +17,7 @@ import play.api.mvc._
 
 import model.ViewValueHome
 import model.ViewValueTodo
+import model.TodoWithCategory
 
 import lib.persistence.onMySQL._
 import lib.model.Todo
@@ -41,29 +37,36 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     Ok(views.html.Home(vv))
   }
 
-  def getTodoList() = Action { implicit req => 
-    val getTodoListFuture: Future[Seq[(String, String, lib.model.Todo.Status, String, lib.model.TodoCategory.Color)]] = for {
-        todoSeq <- TodoRepository.getAll()
-        cateSeq <- TodoCategoryRepository.getAll()
+  def getTodoList() = Action.async { implicit req => 
+    val getTodoFuture = TodoRepository.getAll()
+    val getTodoCategoryFuture = TodoCategoryRepository.getAll()
+
+    val getTodoListFuture: Future[Seq[TodoWithCategory]] = for {
+        todoSeq <- getTodoFuture
+        cateSeq <- getTodoCategoryFuture
     } yield {
       todoSeq.map(todo => {
-          val category = cateSeq.find(cate => cate.v.id.get == TodoCategory.Id(todo.v.categoryId)).get
-          (todo.v.title, todo.v.body, todo.v.state, category.v.name, category.v.color)
+          val category = cateSeq.find(
+            _.v.id.getOrElse(TodoCategory.Id(-1)) == todo.v.categoryId
+          ).getOrElse(
+            TodoCategory.apply(name="ERROR", slug="ERROR", color=TodoCategory.Color.RED)
+          )
+          TodoWithCategory(
+            todo = todo.v, 
+            category = category.v
+          )
         }
       )
     }
-    val result = Await.ready(getTodoListFuture, Duration.Inf)
-
-    val vv = ViewValueTodo(
-      title   = "Todo一覧", 
-      cssSrc  = Seq("main.css"), 
-      jsSrc   = Seq("main.js"), 
-      todoSeq = result.value.get match {
-        case Success(v) => v
-        case Failure(e) => Seq()
+    getTodoListFuture.map(todoList => {
+        val vv = ViewValueTodo(
+          title   = "Todo一覧", 
+          cssSrc  = Seq("main.css"), 
+          jsSrc   = Seq("main.js"), 
+          todoList = todoList
+        )
+        Ok(views.html.Todo(vv))
       }
     )
-    println(vv)
-    Ok(views.html.Todo(vv))
   }
 }
