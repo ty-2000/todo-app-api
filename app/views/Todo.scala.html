@@ -1,15 +1,23 @@
-@*
- *
- * to do sample project
- *
- *@
 
-@(vv: model.ViewValueTodo)
+@(vv: model.ViewValueTodo, 
+  categoryNames: Seq[String], 
+  addTodoForm: Form[controllers.TodoData]
+  )(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
 @common.Default(vv){
   @for(todoWithCategory <- vv.todoList){
     <h3><font color=@todoWithCategory.category.color.name>@todoWithCategory.todo.title</font></h3>
     <p>@todoWithCategory.todo.body</p>
     <p>@todoWithCategory.todo.state.name</p>
     <p>@todoWithCategory.category.name</p>
+  }
+
+  <h2>Add Todo</h2>
+
+  @helper.form( action = helper.CSRF( routes.HomeController.addTodo ) ){
+    @helper.select(field = addTodoForm("categoryId"), options = categoryNames.zipWithIndex.map{ case (n, i) => ((i + 1).toString, n) })
+    @helper.inputText(addTodoForm("title"))
+    @helper.inputText(addTodoForm("body"))
+    <input type="submit" value="追加">
   }
 }

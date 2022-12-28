@@ -13,6 +13,7 @@ import scala.util.Failure
 
 
 import javax.inject._
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 
 import model.ViewValueHome
@@ -25,8 +26,11 @@ import lib.model.TodoCategory
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
+import play.api.data._
+import play.api.data.Forms._
+
 @Singleton
-class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
+class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
 
   def index() = Action { implicit req =>
     val vv = ViewValueHome(
@@ -38,6 +42,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   }
 
   def getTodoList() = Action.async { implicit req => 
+    println("hoge--")
     val getTodoFuture = TodoRepository.getAll()
     val getTodoCategoryFuture = TodoCategoryRepository.getAll()
 
@@ -58,15 +63,59 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
         }
       )
     }
-    getTodoListFuture.map(todoList => {
-        val vv = ViewValueTodo(
-          title   = "Todo一覧", 
-          cssSrc  = Seq("main.css"), 
-          jsSrc   = Seq("main.js"), 
-          todoList = todoList
-        )
-        Ok(views.html.Todo(vv))
-      }
+    // getTodoListFuture.map(todoList => {
+    //     val vv = ViewValueTodo(
+    //       title   = "Todo一覧", 
+    //       cssSrc  = Seq("main.css"), 
+    //       jsSrc   = Seq("main.js"), 
+    //       todoList = todoList
+    //     )
+    //     Ok(views.html.Todo(vv, addTodoForm))
+    //   }
+    // )
+    for {
+      todoSeq <- getTodoListFuture
+      cateSeq <- getTodoCategoryFuture
+    } yield {
+      val vv = ViewValueTodo(
+        title = "Todo一覧", 
+        cssSrc = Seq("main.css"), 
+        jsSrc  = Seq("main.js"), 
+        todoList = todoSeq
+      )
+      val categoryNames = cateSeq.map(_.v.name)
+      Ok(views.html.Todo(vv, categoryNames, addTodoForm))
+    }
+  }
+
+
+  val addTodoForm = Form(
+    mapping(
+      "categoryId" -> number, 
+      "title" -> text, 
+      "body" -> text
+    )(TodoData.apply)(TodoData.unapply)
+  )
+
+  def addTodo() = Action(parse.form(addTodoForm)).async { implicit req => 
+    println("add todo called")
+    val todoData = req.body
+    println(todoData.toString)
+    val todoWithNoId: Todo#WithNoId = Todo.apply(
+      categoryId = TodoCategory.Id(todoData.categoryId), 
+      title      = todoData.title, 
+      body       = todoData.body, 
+      state      = lib.model.Todo.Status.TODO
+    )
+    val addTodoFuture = TodoRepository.add(todoWithNoId)
+    addTodoFuture.map(id => 
+      Redirect("/todo")  
     )
   }
 }
+
+case class TodoData(
+  categoryId: Int, 
+  title: String, 
+  body: String
+)
