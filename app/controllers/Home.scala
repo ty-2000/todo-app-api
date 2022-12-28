@@ -89,7 +89,6 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
 
   def addTodo() = Action(parse.form(addTodoForm)).async { implicit req => 
     val todoData = req.body
-    println(todoData.toString)
     val todoWithNoId: Todo#WithNoId = Todo.apply(
       categoryId = TodoCategory.Id(todoData.categoryId), 
       title      = todoData.title, 
