@@ -1,0 +1,15 @@
+@*
+ *
+ * to do sample project
+ *
+ *@
+
+@(vv: model.ViewValueTodo)
+@common.Default(vv){
+  @for(todoWithCategory <- vv.todoList){
+    <h3><font color=@todoWithCategory.category.color.name>@todoWithCategory.todo.title</font></h3>
+    <p>@todoWithCategory.todo.body</p>
+    <p>@todoWithCategory.todo.state.name</p>
+    <p>@todoWithCategory.category.name</p>
+  }
+}
