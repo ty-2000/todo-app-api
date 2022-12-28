@@ -42,7 +42,6 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   }
 
   def getTodoList() = Action.async { implicit req => 
-    println("hoge--")
     val getTodoFuture = TodoRepository.getAll()
     val getTodoCategoryFuture = TodoCategoryRepository.getAll()
 
@@ -63,16 +62,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
         }
       )
     }
-    // getTodoListFuture.map(todoList => {
-    //     val vv = ViewValueTodo(
-    //       title   = "Todo一覧", 
-    //       cssSrc  = Seq("main.css"), 
-    //       jsSrc   = Seq("main.js"), 
-    //       todoList = todoList
-    //     )
-    //     Ok(views.html.Todo(vv, addTodoForm))
-    //   }
-    // )
+
     for {
       todoSeq <- getTodoListFuture
       cateSeq <- getTodoCategoryFuture
@@ -98,7 +88,6 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   )
 
   def addTodo() = Action(parse.form(addTodoForm)).async { implicit req => 
-    println("add todo called")
     val todoData = req.body
     println(todoData.toString)
     val todoWithNoId: Todo#WithNoId = Todo.apply(

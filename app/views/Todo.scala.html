@@ -7,7 +7,7 @@
 @common.Default(vv){
   @for(todoWithCategory <- vv.todoList){
     <h3><font color=@todoWithCategory.category.color.name>@todoWithCategory.todo.title</font></h3>
-    <p>@todoWithCategory.todo.body</p>
+    <p>@Html(todoWithCategory.todo.body.replaceAll("(\r\n|\r|\n)","<br>"))</p>
     <p>@todoWithCategory.todo.state.name</p>
     <p>@todoWithCategory.category.name</p>
   }
@@ -17,7 +17,7 @@
   @helper.form( action = helper.CSRF( routes.HomeController.addTodo ) ){
     @helper.select(field = addTodoForm("categoryId"), options = categoryNames.zipWithIndex.map{ case (n, i) => ((i + 1).toString, n) })
     @helper.inputText(addTodoForm("title"))
-    @helper.inputText(addTodoForm("body"))
+    @helper.textarea(addTodoForm("body"))
     <input type="submit" value="追加">
   }
 }
