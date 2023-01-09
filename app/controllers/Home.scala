@@ -32,6 +32,8 @@ import forms.AddTodoForm.addTodoForm
 @Singleton
 class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
 
+  val errorTodoCategory = TodoCategory.apply(name="ERROR", slug="ERROR", color=TodoCategory.Color.RED)
+
   def index() = Action { implicit req =>
     val vv = ViewValueHome(
       title  = "Home",
@@ -42,18 +44,18 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   }
 
   def getTodoList() = Action.async { implicit req => 
-    val getTodoFuture = TodoRepository.getAll()
-    val getTodoCategoryFuture = TodoCategoryRepository.getAll()
+    val getAllTodoFuture = TodoRepository.getAll()
+    val getAllTodoCategoryFuture = TodoCategoryRepository.getAll()
 
-    val getTodoListFuture: Future[Seq[TodoWithCategory]] = for {
-        todoSeq <- getTodoFuture
-        cateSeq <- getTodoCategoryFuture
+    val getAllTodoWithCategoryFuture: Future[Seq[TodoWithCategory]] = for {
+        todoSeq     <- getAllTodoFuture
+        categorySeq <- getAllTodoCategoryFuture
     } yield {
       todoSeq.map(todo => {
-          val category = cateSeq.find(
+          val category = categorySeq.find(
             _.v.id.getOrElse(TodoCategory.Id(-1)) == todo.v.categoryId
           ).getOrElse(
-            TodoCategory.apply(name="ERROR", slug="ERROR", color=TodoCategory.Color.RED)
+            errorTodoCategory
           )
           TodoWithCategory(
             todo = todo.v, 
@@ -63,18 +65,18 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
       )
     }
 
+    val vv = ViewValueHome(
+      title = "Todo一覧", 
+      cssSrc = Seq("main.css"), 
+      jsSrc  = Seq("main.js"), 
+    )
+
     for {
-      todoSeq <- getTodoListFuture
-      cateSeq <- getTodoCategoryFuture
+      todoWithCategorySeq <- getAllTodoWithCategoryFuture
+      categorySeq         <- getAllTodoCategoryFuture
     } yield {
-      val vv = ViewValueTodo(
-        title = "Todo一覧", 
-        cssSrc = Seq("main.css"), 
-        jsSrc  = Seq("main.js"), 
-        todoList = todoSeq
-      )
-      val categoryNames = cateSeq.map(_.v.name)
-      Ok(views.html.Todo(vv, categoryNames, addTodoForm))
+      val categoryNames = categorySeq.map(_.v.name)
+      Ok(views.html.Todo(vv, todoWithCategorySeq, categoryNames, addTodoForm))
     }
   }
 

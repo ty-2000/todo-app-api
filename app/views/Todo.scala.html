@@ -1,11 +1,12 @@
 
-@(vv: model.ViewValueTodo, 
+@(vv: model.ViewValueHome, 
+  todoWithCategorySeq: Seq[model.TodoWithCategory], 
   categoryNames: Seq[String], 
   addTodoForm: Form[forms.AddTodoData]
   )(implicit request: RequestHeader, messagesProvider: MessagesProvider)
 
 @common.Default(vv){
-  @for(todoWithCategory <- vv.todoList){
+  @for(todoWithCategory <- todoWithCategorySeq){
     <h3><font color=@todoWithCategory.category.color.name>@todoWithCategory.todo.title</font></h3>
     <p>@Html(todoWithCategory.todo.body.replaceAll("(\r\n|\r|\n)","<br>"))</p>
     <p>@todoWithCategory.todo.state.name</p>
