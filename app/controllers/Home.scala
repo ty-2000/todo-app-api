@@ -23,11 +23,11 @@ import model.TodoWithCategory
 import lib.persistence.onMySQL._
 import lib.model.Todo
 import lib.model.TodoCategory
-import scala.concurrent.Await
-import scala.concurrent.duration._
 
 import play.api.data._
 import play.api.data.Forms._
+
+import forms.AddTodoForm.addTodoForm
 
 @Singleton
 class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
@@ -78,15 +78,6 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     }
   }
 
-
-  val addTodoForm = Form(
-    mapping(
-      "categoryId" -> number, 
-      "title" -> text, 
-      "body" -> text
-    )(TodoData.apply)(TodoData.unapply)
-  )
-
   def addTodo() = Action(parse.form(addTodoForm)).async { implicit req => 
     val todoData = req.body
     val todoWithNoId: Todo#WithNoId = Todo.apply(
@@ -102,8 +93,3 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   }
 }
 
-case class TodoData(
-  categoryId: Int, 
-  title: String, 
-  body: String
-)

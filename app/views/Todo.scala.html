@@ -1,7 +1,7 @@
 
 @(vv: model.ViewValueTodo, 
   categoryNames: Seq[String], 
-  addTodoForm: Form[controllers.TodoData]
+  addTodoForm: Form[forms.AddTodoData]
   )(implicit request: RequestHeader, messagesProvider: MessagesProvider)
 
 @common.Default(vv){
