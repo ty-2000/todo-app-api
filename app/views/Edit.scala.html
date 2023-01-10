@@ -1,0 +1,16 @@
+
+@(vv: model.ViewValueHome, 
+todoWithCategory: model.TodoWithCategory, 
+categorySeq: Seq[lib.model.TodoCategory#EmbeddedId], 
+filledEditTodoForm: Form[forms.EditTodoData]
+)(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
+@common.Default(vv){
+   @helper.form( action = helper.CSRF( routes.HomeController.editTodo(todoWithCategory.todo.id.get.toInt) ) ){
+      @helper.inputText(filledEditTodoForm("title"))
+      @helper.textarea(filledEditTodoForm("body"))
+      @helper.select(field = filledEditTodoForm("status"), options = lib.model.Todo.Status.values.map(status => (status.code.toString, status.name)))
+      @helper.select(field = filledEditTodoForm("categoryId"), options = categorySeq.map(categoryEntity => (categoryEntity.v.id.getOrElse(lib.model.TodoCategory.Id(-1)).toString, categoryEntity.v.name)))
+      <input type="submit" value="更新">
+    }
+}

@@ -27,6 +27,7 @@ import play.api.data._
 import play.api.data.Forms._
 
 import forms.AddTodoForm.addTodoForm
+import forms.EditTodoForm.editTodoForm
 
 @Singleton
 class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
@@ -90,6 +91,61 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     addTodoFuture.map(id => 
       Redirect("/todo")  
     )
+  }
+
+  def editTodoHome(id: Int) = Action.async { implicit req => 
+    val vv = ViewValueHome(
+      title  = "Edit",
+      cssSrc = Seq("main.css"),
+      jsSrc  = Seq("main.js")
+    )
+    val getTodoFuture = TodoRepository.get(Todo.Id(id))
+    val getAllTodoCategoryFuture = TodoCategoryRepository.getAll()
+    
+    for {
+      todo <- getTodoFuture
+      categorySeq <- getAllTodoCategoryFuture
+    } yield {
+      val category = categorySeq.find( _.v.id.getOrElse(TodoCategory.Id(-1)) == todo.get.v.categoryId
+      ).getOrElse( errorTodoCategory )
+      val todoWithCategory = TodoWithCategory(
+        todo = todo.get.v, // todo
+        category = category.v
+      )
+      val filledEditTodoForm = editTodoForm.fill(
+        forms.EditTodoData(
+          title = todoWithCategory.todo.title, 
+          body = todoWithCategory.todo.body, 
+          status = todoWithCategory.todo.state.code, 
+          categoryId = todoWithCategory.todo.categoryId.toInt, 
+        )
+      )
+      Ok( views.html.Edit( vv, todoWithCategory, categorySeq, filledEditTodoForm ) )
+    }
+  }
+
+  def editTodo(id: Int) = Action(parse.form(editTodoForm)).async { implicit req => 
+    val todoData = req.body
+    val getTodoFuture = TodoRepository.get(Todo.Id(id))
+    val getNewTodoFuture = for {
+      updatingTodo <- getTodoFuture
+    } yield {
+      val newTodo = updatingTodo.get.map(
+        _.copy(
+          title = todoData.title, 
+          body = todoData.body, 
+          state = Todo.Status.find(_.code == todoData.status).get, 
+          categoryId = TodoCategory.Id(todoData.categoryId)
+        )
+      )
+      newTodo
+    }
+    for {
+      newTodo <- getNewTodoFuture
+      updatedTodoOption <- TodoRepository.update(newTodo)
+    } yield {
+      Redirect("/todo")
+    }
   }
 }
 
