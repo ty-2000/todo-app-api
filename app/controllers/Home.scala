@@ -74,8 +74,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
       todoWithCategorySeq <- getAllTodoWithCategoryFuture
       categorySeq         <- getAllTodoCategoryFuture
     } yield {
-      val categoryNames = categorySeq.map(_.v.name)
-      Ok(views.html.Todo(vv, todoWithCategorySeq, categoryNames, addTodoForm))
+      Ok(views.html.Todo(vv, todoWithCategorySeq, categorySeq, addTodoForm))
     }
   }
 

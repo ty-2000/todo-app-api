@@ -1,7 +1,7 @@
-
+@import lib.model.TodoCategory
 @(vv: model.ViewValueHome, 
   todoWithCategorySeq: Seq[model.TodoWithCategory], 
-  categoryNames: Seq[String], 
+  categorySeq: Seq[lib.model.TodoCategory#EmbeddedId], 
   addTodoForm: Form[forms.AddTodoData]
   )(implicit request: RequestHeader, messagesProvider: MessagesProvider)
 
@@ -16,7 +16,7 @@
   <h2>Add Todo</h2>
 
   @helper.form( action = helper.CSRF( routes.HomeController.addTodo ) ){
-    @helper.select(field = addTodoForm("categoryId"), options = categoryNames.zipWithIndex.map{ case (n, i) => ((i + 1).toString, n) })
+    @helper.select(field = addTodoForm("categoryId"), options = categorySeq.map(categoryEntity => (categoryEntity.v.id.getOrElse(TodoCategory.Id(-1)).toString, categoryEntity.v.name)))
     @helper.inputText(addTodoForm("title"))
     @helper.textarea(addTodoForm("body"))
     <input type="submit" value="追加">
