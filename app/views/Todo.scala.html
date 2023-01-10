@@ -1,15 +1,34 @@
-@*
- *
- * to do sample project
- *
- *@
+@import lib.model.TodoCategory
+@(vv: model.ViewValueHome, 
+  todoWithCategorySeq: Seq[model.TodoWithCategory], 
+  categorySeq: Seq[lib.model.TodoCategory#EmbeddedId], 
+  addTodoForm: Form[forms.AddTodoData]
+  )(implicit request: RequestHeader, messagesProvider: MessagesProvider)
 
-@(vv: model.ViewValueTodo)
 @common.Default(vv){
-  @for(todoWithCategory <- vv.todoList){
-    <h3><font color=@todoWithCategory.category.color.name>@todoWithCategory.todo.title</font></h3>
-    <p>@todoWithCategory.todo.body</p>
-    <p>@todoWithCategory.todo.state.name</p>
-    <p>@todoWithCategory.category.name</p>
+  <table class="table" id="todoList">
+    <tr>
+      <th>タイトル</th>
+      <th>詳細</th>
+      <th>ステータス</th>
+      <th>カテゴリ</th>
+    </tr>
+    @for(todoWithCategory <- todoWithCategorySeq){
+      <tr>
+        <th><font color=@todoWithCategory.category.color.name>@todoWithCategory.todo.title</font></th>
+        <td>@Html(todoWithCategory.todo.body.replaceAll("(\r\n|\r|\n)","<br>"))</td>
+        <td>@todoWithCategory.todo.state.name</td>
+        <td>@todoWithCategory.category.name</td>
+      <tr>
+    }
+  </table>
+
+  <h2>Add Todo</h2>
+
+  @helper.form( action = helper.CSRF( routes.HomeController.addTodo ) ){
+    @helper.select(field = addTodoForm("categoryId"), options = categorySeq.map(categoryEntity => (categoryEntity.id.toString, categoryEntity.v.name)))
+    @helper.inputText(addTodoForm("title"))
+    @helper.textarea(addTodoForm("body"))
+    <input type="submit" value="追加">
   }
 }

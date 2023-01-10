@@ -43,3 +43,10 @@ body {
 .info {
   display: none;
 }
+
+table {
+  border-collapse:  collapse; /* セルの線を重ねる */
+}
+th,td {
+  padding: 20px 10px;          /* 余白指定 */
+}
