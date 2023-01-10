@@ -20,4 +20,3 @@ object AddTodoForm {
     )(AddTodoData.apply)(AddTodoData.unapply)
   )
 }
-
