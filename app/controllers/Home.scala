@@ -17,7 +17,6 @@ import play.api.i18n.I18nSupport
 import play.api.mvc._
 
 import model.ViewValueHome
-import model.ViewValueTodo
 import model.TodoWithCategory
 
 import lib.persistence.onMySQL._
