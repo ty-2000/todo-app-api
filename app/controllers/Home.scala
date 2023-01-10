@@ -52,7 +52,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     } yield {
       todoSeq.map(todo => {
           val category = categorySeq.find(
-            _.v.id.getOrElse(TodoCategory.Id(-1)) == todo.v.categoryId
+            _.id == todo.v.categoryId
           ).getOrElse(
             errorTodoCategory
           )

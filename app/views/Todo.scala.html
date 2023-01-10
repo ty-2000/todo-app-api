@@ -26,7 +26,7 @@
   <h2>Add Todo</h2>
 
   @helper.form( action = helper.CSRF( routes.HomeController.addTodo ) ){
-    @helper.select(field = addTodoForm("categoryId"), options = categorySeq.map(categoryEntity => (categoryEntity.v.id.getOrElse(TodoCategory.Id(-1)).toString, categoryEntity.v.name)))
+    @helper.select(field = addTodoForm("categoryId"), options = categorySeq.map(categoryEntity => (categoryEntity.id.toString, categoryEntity.v.name)))
     @helper.inputText(addTodoForm("title"))
     @helper.textarea(addTodoForm("body"))
     <input type="submit" value="追加">
