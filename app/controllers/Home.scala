@@ -33,6 +33,7 @@ import forms.EditTodoForm.editTodoForm
 class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
 
   val errorTodoCategory = TodoCategory.apply(name="ERROR", slug="ERROR", color=TodoCategory.Color.RED)
+  val notFoundTodo = Todo.apply(title="NOT FOUND", body="NOT FOUND", state=Todo.Status.TODO, categoryId=TodoCategory.Id(-1))
 
   def index() = Action { implicit req =>
     val vv = ViewValueHome(
@@ -103,13 +104,13 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     val getAllTodoCategoryFuture = TodoCategoryRepository.getAll()
     
     for {
-      todo <- getTodoFuture
+      todoOpt <- getTodoFuture
       categorySeq <- getAllTodoCategoryFuture
     } yield {
-      val category = categorySeq.find( _.v.id.getOrElse(TodoCategory.Id(-1)) == todo.get.v.categoryId
+      val category = categorySeq.find( _.id == todoOpt.getOrElse(notFoundTodo).v.categoryId
       ).getOrElse( errorTodoCategory )
       val todoWithCategory = TodoWithCategory(
-        todo = todo.get.v, // todo
+        todo = todoOpt.getOrElse(notFoundTodo).v, 
         category = category.v
       )
       val filledEditTodoForm = editTodoForm.fill(
@@ -128,17 +129,16 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     val todoData = req.body
     val getTodoFuture = TodoRepository.get(Todo.Id(id))
     val getNewTodoFuture = for {
-      updatingTodo <- getTodoFuture
+      updatingTodoOpt <- getTodoFuture
     } yield {
-      val newTodo = updatingTodo.get.map(
+      updatingTodoOpt.get.map(
         _.copy(
           title = todoData.title, 
           body = todoData.body, 
-          state = Todo.Status.find(_.code == todoData.status).get, 
+          state = Todo.Status.find(_.code == todoData.status).getOrElse(Todo.Status.TODO), 
           categoryId = TodoCategory.Id(todoData.categoryId)
         )
       )
-      newTodo
     }
     for {
       newTodo <- getNewTodoFuture
