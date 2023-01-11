@@ -128,21 +128,29 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   def editTodo(id: Int) = Action(parse.form(editTodoForm)).async { implicit req => 
     val todoData = req.body
     val getTodoFuture = TodoRepository.get(Todo.Id(id))
-    val getNewTodoFuture = for {
+    val getNewTodoOptFuture = for {
       updatingTodoOpt <- getTodoFuture
     } yield {
-      updatingTodoOpt.get.map(
-        _.copy(
-          title = todoData.title, 
-          body = todoData.body, 
-          state = Todo.Status.find(_.code == todoData.status).getOrElse(Todo.Status.TODO), 
-          categoryId = TodoCategory.Id(todoData.categoryId)
+      updatingTodoOpt.map( 
+        _.map(
+          _.copy(
+            title = todoData.title, 
+            body = todoData.body, 
+            state = Todo.Status.find(_.code == todoData.status).getOrElse(Todo.Status.TODO), 
+            categoryId = TodoCategory.Id(todoData.categoryId)
+          )
         )
       )
     }
+    def updateTodoFuture(entityOpt: Option[Todo#EmbeddedId]): Future[Option[Todo#EmbeddedId]] = {
+      entityOpt match {
+        case Some(entity) => TodoRepository.update(entity)
+        case None         => Future.successful(None)
+      }
+    }
     for {
-      newTodo <- getNewTodoFuture
-      updatedTodoOption <- TodoRepository.update(newTodo)
+      newTodoOpt <- getNewTodoOptFuture
+      updatedTodoOption <- updateTodoFuture(newTodoOpt)
     } yield {
       Redirect("/todo")
     }
