@@ -89,7 +89,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     )
     val addTodoFuture = TodoRepository.add(todoWithNoId)
     addTodoFuture.map(id => 
-      Redirect("/todo")  
+      Redirect(routes.HomeController.getTodoList)
     )
   }
 
@@ -109,21 +109,21 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
       todoOpt match {
         case Some(todo) => {
           val category = categorySeq.find(_.id == todo.v.categoryId
-      ).getOrElse( errorTodoCategory )
-      val todoWithCategory = TodoWithCategory(
+          ).getOrElse( errorTodoCategory )
+          val todoWithCategory = TodoWithCategory(
             todo = todo.v, 
-        category = category.v
-      )
-      val filledEditTodoForm = editTodoForm.fill(
-        forms.EditTodoData(
-          title = todoWithCategory.todo.title, 
-          body = todoWithCategory.todo.body, 
-          status = todoWithCategory.todo.state.code, 
-          categoryId = todoWithCategory.todo.categoryId.toInt, 
-        )
-      )
-      Ok( views.html.Edit( vv, todoWithCategory, categorySeq, filledEditTodoForm ) )
-    }
+            category = category.v
+          )
+          val filledEditTodoForm = editTodoForm.fill(
+            forms.EditTodoData(
+              title = todoWithCategory.todo.title, 
+              body = todoWithCategory.todo.body, 
+              status = todoWithCategory.todo.state.code, 
+              categoryId = todoWithCategory.todo.categoryId.toInt, 
+            )
+          )
+          Ok( views.html.Edit( vv, todoWithCategory, categorySeq, filledEditTodoForm ) )
+        }
         case None => {
           Redirect(routes.HomeController.getTodoList)
         }
@@ -153,7 +153,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
         case None          => Future.successful(None)
       }
     } yield {
-      Redirect("/todo")
+      Redirect(routes.HomeController.getTodoList)
     }
   }
 }
