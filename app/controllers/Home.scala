@@ -33,7 +33,6 @@ import forms.EditTodoForm.editTodoForm
 class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
 
   val errorTodoCategory = TodoCategory.apply(name="ERROR", slug="ERROR", color=TodoCategory.Color.RED)
-  val notFoundTodo = Todo.apply(title="NOT FOUND", body="NOT FOUND", state=Todo.Status.TODO, categoryId=TodoCategory.Id(-1))
 
   def index() = Action { implicit req =>
     val vv = ViewValueHome(
@@ -107,10 +106,12 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
       todoOpt <- getTodoFuture
       categorySeq <- getAllTodoCategoryFuture
     } yield {
-      val category = categorySeq.find( _.id == todoOpt.getOrElse(notFoundTodo).v.categoryId
+      todoOpt match {
+        case Some(todo) => {
+          val category = categorySeq.find(_.id == todo.v.categoryId
       ).getOrElse( errorTodoCategory )
       val todoWithCategory = TodoWithCategory(
-        todo = todoOpt.getOrElse(notFoundTodo).v, 
+            todo = todo.v, 
         category = category.v
       )
       val filledEditTodoForm = editTodoForm.fill(
@@ -122,6 +123,11 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
         )
       )
       Ok( views.html.Edit( vv, todoWithCategory, categorySeq, filledEditTodoForm ) )
+    }
+        case None => {
+          Redirect(routes.HomeController.getTodoList)
+        }
+      }
     }
   }
 
