@@ -116,6 +116,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
           )
           val filledEditTodoForm = editTodoForm.fill(
             forms.EditTodoData(
+              id = todo.id.toInt, 
               title = todoWithCategory.todo.title, 
               body = todoWithCategory.todo.body, 
               status = todoWithCategory.todo.state.code, 
@@ -131,9 +132,9 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     }
   }
 
-  def editTodo(id: Int) = Action(parse.form(editTodoForm)).async { implicit req => 
+  def editTodo() = Action(parse.form(editTodoForm)).async { implicit req => 
     val todoData = req.body
-    val getNewTodoOptFuture = TodoRepository.get(Todo.Id(id)).map{
+    val getNewTodoOptFuture = TodoRepository.get(Todo.Id(todoData.id)).map{
       _.map(
         _.map(
           _.copy(

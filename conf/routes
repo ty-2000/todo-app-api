@@ -7,7 +7,7 @@
 GET     /                             controllers.HomeController.index
 GET     /todo                         controllers.HomeController.getTodoList
 POST    /todo                         controllers.HomeController.addTodo
-POST    /todo/edit/:id                controllers.HomeController.editTodo(id: Int)
+POST    /todo/edit                    controllers.HomeController.editTodo
 GET     /todo/edit/:id                controllers.HomeController.editTodoHome(id: Int)
 
 # Map static resources from the /public folder to the /assets URL path

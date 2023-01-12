@@ -6,6 +6,7 @@ import play.api.data._
 import play.api.data.Forms._
 
 case class EditTodoData(
+  id:         Int, 
   title:      String, 
   body:       String, 
   status:     Int, 
@@ -15,6 +16,7 @@ case class EditTodoData(
 object EditTodoForm {
   val editTodoForm = Form(
     mapping(
+      "id" -> number, 
       "title" -> text, 
       "body" -> text, 
       "status" -> number, 
