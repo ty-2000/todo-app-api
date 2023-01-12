@@ -7,10 +7,10 @@ filledEditTodoForm: Form[forms.EditTodoData]
 
 @common.Default(vv){
    @helper.form( action = helper.CSRF( routes.HomeController.editTodo ) ){
-      @helper.inputText(filledEditTodoForm("title"))
-      @helper.textarea(filledEditTodoForm("body"))
-      @helper.select(field = filledEditTodoForm("status"), options = lib.model.Todo.Status.values.map(status => (status.code.toString, status.name)))
-      @helper.select(field = filledEditTodoForm("categoryId"), options = categorySeq.map(categoryEntity => (categoryEntity.id.toString, categoryEntity.v.name)))
+      @helper.inputText(filledEditTodoForm("title"), '_label -> "タイトル")
+      @helper.textarea(filledEditTodoForm("body"), '_label -> "詳細")
+      @helper.select(field = filledEditTodoForm("status"), options = lib.model.Todo.Status.values.map(status => (status.code.toString, status.name)), '_label -> "ステータス")
+      @helper.select(field = filledEditTodoForm("categoryId"), options = categorySeq.map(categoryEntity => (categoryEntity.id.toString, categoryEntity.v.name)), '_label -> "カテゴリ")
       <input type="hidden" value="@filledEditTodoForm("id").value" name="id">
       <input type="submit" value="更新">
     }
