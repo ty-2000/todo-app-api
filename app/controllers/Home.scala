@@ -142,15 +142,13 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
         )
       )
     }
-    def updateTodoFuture(entityOpt: Option[Todo#EmbeddedId]): Future[Option[Todo#EmbeddedId]] = {
-      entityOpt match {
-        case Some(entity) => TodoRepository.update(entity)
-        case None         => Future.successful(None)
-      }
-    }
+
     for {
       newTodoOpt <- getNewTodoOptFuture
-      updatedTodoOption <- updateTodoFuture(newTodoOpt)
+      updatedTodoOption <- newTodoOpt match {
+        case Some(newTodo) => TodoRepository.update(newTodo)
+        case None          => Future.successful(None)
+      }
     } yield {
       Redirect("/todo")
     }
