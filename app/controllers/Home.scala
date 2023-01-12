@@ -133,11 +133,8 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
 
   def editTodo(id: Int) = Action(parse.form(editTodoForm)).async { implicit req => 
     val todoData = req.body
-    val getTodoFuture = TodoRepository.get(Todo.Id(id))
-    val getNewTodoOptFuture = for {
-      updatingTodoOpt <- getTodoFuture
-    } yield {
-      updatingTodoOpt.map( 
+    val getNewTodoOptFuture = TodoRepository.get(Todo.Id(id)).map{
+      _.map(
         _.map(
           _.copy(
             title = todoData.title, 
