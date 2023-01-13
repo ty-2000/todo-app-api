@@ -93,40 +93,46 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     )
   }
 
-  def editTodoHome(id: Int) = Action.async { implicit req => 
-    val vv = ViewValueHome(
-      title  = "Edit",
-      cssSrc = Seq("main.css"),
-      jsSrc  = Seq("main.js")
-    )
-    val getTodoFuture = TodoRepository.get(Todo.Id(id))
-    val getAllTodoCategoryFuture = TodoCategoryRepository.getAll()
-    
-    for {
-      todoOpt <- getTodoFuture
-      categorySeq <- getAllTodoCategoryFuture
-    } yield {
-      todoOpt match {
-        case Some(todo) => {
-          val category = categorySeq.find(_.id == todo.v.categoryId
-          ).getOrElse( errorTodoCategory )
-          val todoWithCategory = TodoWithCategory(
-            todo = todo.v, 
-            category = category.v
-          )
-          val filledEditTodoForm = editTodoForm.fill(
-            forms.EditTodoData(
-              id = todo.id.toInt, 
-              title = todoWithCategory.todo.title, 
-              body = todoWithCategory.todo.body, 
-              status = todoWithCategory.todo.state.code, 
-              categoryId = todoWithCategory.todo.categoryId.toInt, 
-            )
-          )
-          Ok( views.html.Edit( vv, todoWithCategory, categorySeq, filledEditTodoForm ) )
-        }
-        case None => {
-          Redirect(routes.HomeController.getTodoList)
+  def editTodoHome(idOpt: Option[Int]) = Action.async { implicit req => 
+
+    idOpt match {
+      case None => Future.successful(Redirect(routes.HomeController.getTodoList))
+      case Some(id) => {
+        val vv = ViewValueHome(
+          title  = "Edit",
+          cssSrc = Seq("main.css"),
+          jsSrc  = Seq("main.js")
+        )
+        val getTodoFuture = TodoRepository.get(Todo.Id(id))
+        val getAllTodoCategoryFuture = TodoCategoryRepository.getAll()
+        
+        for {
+          todoOpt <- getTodoFuture
+          categorySeq <- getAllTodoCategoryFuture
+        } yield {
+          todoOpt match {
+            case Some(todo) => {
+              val category = categorySeq.find(_.id == todo.v.categoryId
+              ).getOrElse( errorTodoCategory )
+              val todoWithCategory = TodoWithCategory(
+                todo = todo.v, 
+                category = category.v
+              )
+              val filledEditTodoForm = editTodoForm.fill(
+                forms.EditTodoData(
+                  id = todo.id.toInt, 
+                  title = todoWithCategory.todo.title, 
+                  body = todoWithCategory.todo.body, 
+                  status = todoWithCategory.todo.state.code, 
+                  categoryId = todoWithCategory.todo.categoryId.toInt, 
+                )
+              )
+              Ok( views.html.Edit( vv, todoWithCategory, categorySeq, filledEditTodoForm ) )
+            }
+            case None => {
+              Redirect(routes.HomeController.getTodoList)
+            }
+          }
         }
       }
     }
