@@ -12,7 +12,7 @@ case class AddCategoryData(
 )
 
 object AddCategoryForm {
-  val addCategoryForm = Form(
+  val addCategoryForm: Form[AddCategoryData] = Form(
     mapping(
       "name" -> nonEmptyText, 
       "slug" -> nonEmptyText, 

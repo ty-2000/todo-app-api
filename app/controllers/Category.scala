@@ -10,8 +10,6 @@ import javax.inject._
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 import model.ViewValueHome
 
 import lib.persistence.onMySQL._ // repository
@@ -19,6 +17,11 @@ import lib.model.TodoCategory
 
 import forms.AddCategoryForm.addCategoryForm
 
+import play.api.data._
+import play.api.data.Forms._
+
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class CategoryController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
@@ -30,7 +33,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
       jsSrc  = Seq("main.js"), 
     )
     TodoCategoryRepository.getAll().map{ categorySeq => 
-      Ok(views.html.Category(vv, categorySeq))
+      Ok(views.html.category.Category(vv, categorySeq))
     }
   }
 
@@ -54,13 +57,13 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
         Future.successful(BadRequest(views.html.category.add(vv, formWithErrors)))
       }, 
       categoryData => {
-    val categoryWithNoId: TodoCategory#WithNoId = TodoCategory.apply(
-      name       = categoryData.name, 
-      slug       = categoryData.slug, 
-      color      = TodoCategory.Color.find(_.code == categoryData.color).getOrElse(TodoCategory.Color.RED)
-    )
-    val addCategoryFuture = TodoCategoryRepository.add(categoryWithNoId)
-    addCategoryFuture.map(id => 
+        val categoryWithNoId: TodoCategory#WithNoId = TodoCategory.apply(
+          name       = categoryData.name, 
+          slug       = categoryData.slug, 
+          color      = TodoCategory.Color.find(_.code == categoryData.color).getOrElse(TodoCategory.Color.RED)
+        )
+        val addCategoryFuture = TodoCategoryRepository.add(categoryWithNoId)
+        addCategoryFuture.map(id => 
           Redirect(routes.CategoryController.getList)  
         )
       }
