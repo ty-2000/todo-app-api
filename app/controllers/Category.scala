@@ -27,11 +27,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
       cssSrc = Seq("main.css"), 
       jsSrc  = Seq("main.js"), 
     )
-    val getAllCategoryFuture = TodoCategoryRepository.getAll()
-
-    for {
-      categorySeq         <- getAllCategoryFuture
-    } yield {
+    TodoCategoryRepository.getAll().map{ categorySeq => 
       Ok(views.html.Category(vv, categorySeq))
     }
   }
