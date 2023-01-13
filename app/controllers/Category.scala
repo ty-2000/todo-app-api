@@ -21,7 +21,7 @@ import lib.model.TodoCategory
 @Singleton
 class CategoryController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
 
-  def index() = Action.async { implicit req =>
+  def getList() = Action.async { implicit req =>
     val vv = ViewValueHome(
       title = "Todo一覧", 
       cssSrc = Seq("main.css"), 
