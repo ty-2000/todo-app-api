@@ -158,9 +158,12 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     }
   }
 
-  def deleteTodo(id: Int) = Action.async {implicit req => 
-    TodoRepository.remove(Todo.Id(id)).map{ _ => 
-      Redirect(routes.HomeController.getTodoList)
+  def deleteTodo(idOpt: Option[Int]) = Action.async {implicit req => 
+    idOpt match {
+      case Some(id) => TodoRepository.remove(Todo.Id(id)).map{ _ => 
+          Redirect(routes.HomeController.getTodoList)
+        }
+      case None => Future.successful(Redirect(routes.HomeController.getTodoList))
     }
   }
 }

@@ -23,7 +23,7 @@
         <td>@todoWithCategory.category.name</td>
         <td><a href="@{routes.HomeController.editTodoHome(todoWithCategory.todo.id.getOrElse(lib.model.Todo.Id(-1)).toInt)}"><span>編集</span></a></td>
         <td>
-          @helper.form( action = helper.CSRF( routes.HomeController.deleteTodo(todoWithCategory.todo.id.getOrElse(lib.model.Todo.Id(-1)).toInt) ) ){
+          @helper.form( action = helper.CSRF( routes.HomeController.deleteTodo(todoWithCategory.todo.id.map(_.toInt)) ) ){
             <input type="submit" value="削除">
           }
         </td>
