@@ -27,6 +27,7 @@ import play.api.data._
 import play.api.data.Forms._
 
 import forms.AddTodoForm.addTodoForm
+import forms.EditTodoForm.editTodoForm
 
 @Singleton
 class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
@@ -88,8 +89,73 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
     )
     val addTodoFuture = TodoRepository.add(todoWithNoId)
     addTodoFuture.map(id => 
-      Redirect("/todo")  
+      Redirect(routes.HomeController.getTodoList)
     )
+  }
+
+  def editTodoHome(id: Int) = Action.async { implicit req => 
+    val vv = ViewValueHome(
+      title  = "Edit",
+      cssSrc = Seq("main.css"),
+      jsSrc  = Seq("main.js")
+    )
+    val getTodoFuture = TodoRepository.get(Todo.Id(id))
+    val getAllTodoCategoryFuture = TodoCategoryRepository.getAll()
+    
+    for {
+      todoOpt <- getTodoFuture
+      categorySeq <- getAllTodoCategoryFuture
+    } yield {
+      todoOpt match {
+        case Some(todo) => {
+          val category = categorySeq.find(_.id == todo.v.categoryId
+          ).getOrElse( errorTodoCategory )
+          val todoWithCategory = TodoWithCategory(
+            todo = todo.v, 
+            category = category.v
+          )
+          val filledEditTodoForm = editTodoForm.fill(
+            forms.EditTodoData(
+              id = todo.id.toInt, 
+              title = todoWithCategory.todo.title, 
+              body = todoWithCategory.todo.body, 
+              status = todoWithCategory.todo.state.code, 
+              categoryId = todoWithCategory.todo.categoryId.toInt, 
+            )
+          )
+          Ok( views.html.Edit( vv, todoWithCategory, categorySeq, filledEditTodoForm ) )
+        }
+        case None => {
+          Redirect(routes.HomeController.getTodoList)
+        }
+      }
+    }
+  }
+
+  def editTodo() = Action(parse.form(editTodoForm)).async { implicit req => 
+    val todoData = req.body
+    val getNewTodoOptFuture = TodoRepository.get(Todo.Id(todoData.id)).map{
+      _.map(
+        _.map(
+          _.copy(
+            title = todoData.title, 
+            body = todoData.body, 
+            state = Todo.Status.find(_.code == todoData.status).getOrElse(Todo.Status.TODO), 
+            categoryId = TodoCategory.Id(todoData.categoryId)
+          )
+        )
+      )
+    }
+
+    for {
+      newTodoOpt <- getNewTodoOptFuture
+      updatedTodoOption <- newTodoOpt match {
+        case Some(newTodo) => TodoRepository.update(newTodo)
+        case None          => Future.successful(None)
+      }
+    } yield {
+      Redirect(routes.HomeController.getTodoList)
+    }
   }
 }
 

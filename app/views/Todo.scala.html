@@ -12,6 +12,7 @@
       <th>詳細</th>
       <th>ステータス</th>
       <th>カテゴリ</th>
+      <th> </th>
     </tr>
     @for(todoWithCategory <- todoWithCategorySeq){
       <tr>
@@ -19,6 +20,7 @@
         <td>@Html(todoWithCategory.todo.body.replaceAll("(\r\n|\r|\n)","<br>"))</td>
         <td>@todoWithCategory.todo.state.name</td>
         <td>@todoWithCategory.category.name</td>
+        <td><a href="@{routes.HomeController.editTodoHome(todoWithCategory.todo.id.getOrElse(lib.model.Todo.Id(-1)).toInt)}"><span>編集</span></a></td>
       <tr>
     }
   </table>
