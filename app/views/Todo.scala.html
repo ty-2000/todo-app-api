@@ -17,13 +17,13 @@
     </tr>
     @for(todoWithCategory <- todoWithCategorySeq){
       <tr>
-        <th><font color=@todoWithCategory.category.color.name>@todoWithCategory.todo.title</font></th>
-        <td>@Html(todoWithCategory.todo.body.replaceAll("(\r\n|\r|\n)","<br>"))</td>
-        <td>@todoWithCategory.todo.state.name</td>
-        <td>@todoWithCategory.category.name</td>
-        <td><a href="@{routes.HomeController.editTodoHome(todoWithCategory.todo.id.map(_.toInt))}"><span>編集</span></a></td>
+        <th><font color=@todoWithCategory.category.v.color.name>@todoWithCategory.todo.v.title</font></th>
+        <td>@Html(todoWithCategory.todo.v.body.replaceAll("(\r\n|\r|\n)","<br>"))</td>
+        <td>@todoWithCategory.todo.v.state.name</td>
+        <td>@todoWithCategory.category.v.name</td>
+        <td><a href="@{routes.HomeController.editTodoHome(todoWithCategory.todo.id.toInt)}"><span>編集</span></a></td>
         <td>
-          @helper.form( action = helper.CSRF( routes.HomeController.deleteTodo(todoWithCategory.todo.id.map(_.toInt)) ) ){
+          @helper.form( action = helper.CSRF( routes.HomeController.deleteTodo(todoWithCategory.todo.id.toInt) ) ){
             <input type="submit" value="削除">
           }
         </td>

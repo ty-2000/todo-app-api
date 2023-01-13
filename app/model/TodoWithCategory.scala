@@ -1,7 +1,8 @@
 
 package model
+import lib.persistence.onMySQL._
 
 case class TodoWithCategory(
-  todo: lib.model.Todo, 
-  category: lib.model.TodoCategory
+  todo: TodoRepository.EntityEmbeddedId, 
+  category: TodoCategoryRepository.EntityEmbeddedId
 )
