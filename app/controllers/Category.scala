@@ -34,8 +34,26 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
     }
   }
 
-  def add() = Action(parse.form(addCategoryForm)).async { implicit req => 
-    val categoryData = req.body
+  def addHome() = Action { implicit req =>
+    val vv = ViewValueHome(
+      title = "Category追加", 
+      cssSrc = Seq("main.css"), 
+      jsSrc  = Seq("main.js"), 
+    )
+    Ok(views.html.category.add(vv, addCategoryForm))
+  }
+
+  def add() = Action.async { implicit request => 
+    addCategoryForm.bindFromRequest.fold(
+      formWithErrors => {
+        val vv = ViewValueHome(
+          title = "Category追加", 
+          cssSrc = Seq("main.css"), 
+          jsSrc  = Seq("main.js"), 
+        )
+        Future.successful(BadRequest(views.html.category.add(vv, formWithErrors)))
+      }, 
+      categoryData => {
     val categoryWithNoId: TodoCategory#WithNoId = TodoCategory.apply(
       name       = categoryData.name, 
       slug       = categoryData.slug, 
@@ -43,7 +61,9 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
     )
     val addCategoryFuture = TodoCategoryRepository.add(categoryWithNoId)
     addCategoryFuture.map(id => 
-      Redirect("/todo")  
+          Redirect(routes.CategoryController.getList)  
+        )
+      }
     )
   }
 }
