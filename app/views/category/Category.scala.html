@@ -9,12 +9,14 @@
       <th>名前</th>
       <th>Slug</th>
       <th>色</th>
+      <th></th>
     </tr>
     @for(category <- categorySeq){
       <tr>
         <th>@category.v.name</th>
         <td>@category.v.slug</td>
         <td><font color=@category.v.color.name>■</font></td>
+        <td><a href="@{routes.CategoryController.editHome(category.id.toInt)}"><span>編集</span></a></td>
       <tr>
     }
     <tr>

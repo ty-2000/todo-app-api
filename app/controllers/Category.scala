@@ -16,6 +16,7 @@ import lib.persistence.onMySQL._ // repository
 import lib.model.TodoCategory
 
 import forms.AddCategoryForm.addCategoryForm
+import forms.EditCategoryForm.editCategoryForm
 
 import play.api.data._
 import play.api.data.Forms._
@@ -65,6 +66,65 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
         TodoCategoryRepository.add(categoryWithNoId).map(_ => 
           Redirect(routes.CategoryController.getList)  
         )
+      }
+    )
+  }
+
+  def editHome(id: Int) = Action.async { implicit req => 
+    val vv = ViewValueHome(
+      title  = "Category 編集", 
+      cssSrc =  Seq("main.css"), 
+      jsSrc  = Seq("main.js"), 
+    )
+
+    TodoCategoryRepository.get(TodoCategory.Id(id)).map{ 
+      _ match {
+        case None               => Redirect(routes.CategoryController.getList)
+        case Some(todoCategory) => {
+          val filledEditTodoForm = editCategoryForm.fill(
+            forms.EditCategoryData(
+              id    = todoCategory.id.toInt, 
+              name  = todoCategory.v.name, 
+              slug  = todoCategory.v.slug, 
+              color = todoCategory.v.color.code
+            )
+          )
+          Ok(views.html.category.edit(vv, filledEditTodoForm))
+        }
+      }
+    }
+
+  }
+
+  def edit() = Action.async {implicit req => 
+    editCategoryForm.bindFromRequest.fold(
+      formWithErrors => {
+        val vv = ViewValueHome(
+          title = "Category編集", 
+          cssSrc = Seq("main.css"), 
+          jsSrc  = Seq("main.js"), 
+        )
+        Future.successful(BadRequest(views.html.category.edit(vv, formWithErrors)))
+      }, 
+      categoryData => {
+        for {
+          newTodoCategoryOpt <- TodoCategoryRepository.get(TodoCategory.Id(categoryData.id)).map{
+            _.map(
+              _.map(_.copy(
+                  name = categoryData.name, 
+                  slug = categoryData.slug, 
+                  color = TodoCategory.Color.find(_.code == categoryData.color).getOrElse(TodoCategory.Color.RED)
+                )
+              )
+            )
+          }
+          updatedTodoCategoryOpt <- newTodoCategoryOpt match {
+            case Some(newTodoCategory) => TodoCategoryRepository.update(newTodoCategory)
+            case None                  => Future.successful(nonEmptyText)
+          }
+        }yield{
+            Redirect(routes.CategoryController.getList)
+        }
       }
     )
   }
