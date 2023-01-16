@@ -17,6 +17,11 @@
         <td>@category.v.slug</td>
         <td><font color=@category.v.color.name>■</font></td>
         <td><a href="@{routes.CategoryController.editHome(category.id.toInt)}"><span>編集</span></a></td>
+        <td>
+          @helper.form( action = helper.CSRF( routes.CategoryController.delete(category.id.toInt ) ) ){
+            <input type="submit" value="削除">
+          }
+        </td>
       <tr>
     }
     <tr>

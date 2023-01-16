@@ -32,6 +32,12 @@ case class TodoRepository[P <: JdbcProfile]()(implicit val driver: P)
       .result
   }
 
+  def getByCategoryId(categoryId: lib.model.TodoCategory.Id): Future[Seq[EntityEmbeddedId]] = 
+    RunDBAction(TodoTable, "slave") { _
+      .filter(_.categoryId === categoryId)
+      .result
+    }
+
   /**
     * Add Todo Data
    */
