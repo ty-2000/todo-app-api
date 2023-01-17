@@ -60,7 +60,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
         val categoryWithNoId: TodoCategory#WithNoId = TodoCategory.apply(
           name       = categoryData.name, 
           slug       = categoryData.slug, 
-          color      = TodoCategory.Color.find(_.code == categoryData.color).getOrElse(TodoCategory.Color.RED)
+          color      = categoryData.color
         )
         TodoCategoryRepository.add(categoryWithNoId).map(_ => 
           Redirect(routes.CategoryController.getList)  
