@@ -18,10 +18,7 @@ object AddCategoryForm {
       "name" -> nonEmptyText, 
       "slug" -> nonEmptyText.verifying("error.numberOrEnglish", s => s.matches("^[a-zA-Z0-9]+$")), 
       "color" -> number.transform[Color](
-        (colorId => {
-          println(colorId)
-          Color.find(_.code == colorId).getOrElse(Color.RED)
-        }), 
+        (colorId => Color.find(_.code == colorId).getOrElse(Color.RED)), 
         _.code
       )
     )(AddCategoryData.apply)(AddCategoryData.unapply)
