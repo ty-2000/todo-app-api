@@ -1,0 +1,22 @@
+@import lib.model.TodoCategory
+@(vv: model.ViewValueHome, 
+  categorySeq: Seq[lib.model.TodoCategory#EmbeddedId]
+  )(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
+@common.Default(vv){
+  <table class="table" id="todoList">
+    <tr>
+      <th>名前</th>
+      <th>Slug</th>
+      <th>色</th>
+    </tr>
+    @for(category <- categorySeq){
+      <tr>
+        <th>@category.v.name</th>
+        <td>@category.v.slug</td>
+        <td><font color=@category.v.color.name>■</font></td>
+      <tr>
+    }
+  </table>
+  <a href="@{routes.HomeController.getTodoList}"><span>戻る</span></a>
+}
