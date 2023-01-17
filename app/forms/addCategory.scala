@@ -16,7 +16,7 @@ object AddCategoryForm {
   val addCategoryForm: Form[AddCategoryData] = Form(
     mapping(
       "name" -> nonEmptyText, 
-      "slug" -> nonEmptyText.verifying("英数字のみ", s => s.matches("^[a-zA-Z0-9]+$")), 
+      "slug" -> nonEmptyText.verifying("error.numberOrEnglish", s => s.matches("^[a-zA-Z0-9]+$")), 
       "color" -> number.transform[Color](
         (colorId => {
           println(colorId)
