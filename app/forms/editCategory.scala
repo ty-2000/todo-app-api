@@ -18,7 +18,7 @@ object EditCategoryForm {
     mapping(
       "id"    -> number, 
       "name"  -> nonEmptyText, 
-      "slug"  -> nonEmptyText.verifying("英数字のみ", s => s.matches("^[a-zA-Z0-9]+$")), 
+      "slug"  -> nonEmptyText.verifying("error.numberOrEnglish", s => s.matches("^[a-zA-Z0-9]+$")), 
       "color" -> number.transform[Color](
         (colorId => Color.find(_.code == colorId).getOrElse(Color.RED)), 
         _.code
