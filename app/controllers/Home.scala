@@ -32,7 +32,7 @@ import forms.EditTodoForm.editTodoForm
 @Singleton
 class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
 
-  val errorTodoCategory = TodoCategory.apply(name="ERROR", slug="ERROR", color=TodoCategory.Color.RED)
+  val errorTodoCategory = TodoCategory.apply(id=Some(TodoCategory.Id(-1)), name="ERROR", slug="ERROR", color=TodoCategory.Color.RED).toEmbeddedId
 
   def index() = Action { implicit req =>
     val vv = ViewValueHome(
@@ -54,12 +54,10 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
       todoSeq.map(todo => {
           val category = categorySeq.find(
             _.id == todo.v.categoryId
-          ).getOrElse(
-            errorTodoCategory
-          )
+          ).getOrElse(errorTodoCategory)
           TodoWithCategory(
-            todo = todo.v, 
-            category = category.v
+            todo = todo, 
+            category = category
           )
         }
       )
@@ -94,6 +92,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   }
 
   def editTodoHome(id: Int) = Action.async { implicit req => 
+
     val vv = ViewValueHome(
       title  = "Edit",
       cssSrc = Seq("main.css"),
@@ -109,18 +108,18 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
       todoOpt match {
         case Some(todo) => {
           val category = categorySeq.find(_.id == todo.v.categoryId
-          ).getOrElse( errorTodoCategory )
+          ).getOrElse(errorTodoCategory)
           val todoWithCategory = TodoWithCategory(
-            todo = todo.v, 
-            category = category.v
+            todo = todo, 
+            category = category
           )
           val filledEditTodoForm = editTodoForm.fill(
             forms.EditTodoData(
               id = todo.id.toInt, 
-              title = todoWithCategory.todo.title, 
-              body = todoWithCategory.todo.body, 
-              status = todoWithCategory.todo.state.code, 
-              categoryId = todoWithCategory.todo.categoryId.toInt, 
+              title = todoWithCategory.todo.v.title, 
+              body = todoWithCategory.todo.v.body, 
+              status = todoWithCategory.todo.v.state.code, 
+              categoryId = todoWithCategory.todo.v.categoryId.toInt, 
             )
           )
           Ok( views.html.Edit( vv, todoWithCategory, categorySeq, filledEditTodoForm ) )
@@ -154,6 +153,12 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
         case None          => Future.successful(None)
       }
     } yield {
+      Redirect(routes.HomeController.getTodoList)
+    }
+  }
+
+  def deleteTodo(id: Int) = Action.async {implicit req => 
+    TodoRepository.remove(Todo.Id(id)).map{ _ => 
       Redirect(routes.HomeController.getTodoList)
     }
   }
