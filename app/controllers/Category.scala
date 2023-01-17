@@ -86,7 +86,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
               id    = todoCategory.id.toInt, 
               name  = todoCategory.v.name, 
               slug  = todoCategory.v.slug, 
-              color = todoCategory.v.color.code
+              color = todoCategory.v.color
             )
           )
           Ok(views.html.category.edit(vv, filledEditTodoForm))
@@ -113,7 +113,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
               _.map(_.copy(
                   name = categoryData.name, 
                   slug = categoryData.slug, 
-                  color = TodoCategory.Color.find(_.code == categoryData.color).getOrElse(TodoCategory.Color.RED)
+                  color = categoryData.color
                 )
               )
             )
