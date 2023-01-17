@@ -23,7 +23,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
 
   def getList() = Action.async { implicit req =>
     val vv = ViewValueHome(
-      title = "Todo一覧", 
+      title = "カテゴリ一覧", 
       cssSrc = Seq("main.css"), 
       jsSrc  = Seq("main.js"), 
     )
