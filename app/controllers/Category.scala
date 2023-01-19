@@ -118,9 +118,9 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
               )
             )
           }
-          updatedTodoCategoryOpt <- newTodoCategoryOpt match {
+          _ <- newTodoCategoryOpt match {
             case Some(newTodoCategory) => TodoCategoryRepository.update(newTodoCategory)
-            case None                  => Future.successful(nonEmptyText)
+            case None                  => Future.successful(None)
           }
         }yield{
             Redirect(routes.CategoryController.getList)
