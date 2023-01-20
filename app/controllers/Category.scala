@@ -10,13 +10,18 @@ import javax.inject._
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 import model.ViewValueHome
 
 import lib.persistence.onMySQL._ // repository
 import lib.model.TodoCategory
 
+import forms.AddCategoryForm.addCategoryForm
+
+import play.api.data._
+import play.api.data.Forms._
+
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class CategoryController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
@@ -28,8 +33,40 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
       jsSrc  = Seq("main.js"), 
     )
     TodoCategoryRepository.getAll().map{ categorySeq => 
-      Ok(views.html.Category(vv, categorySeq))
+      Ok(views.html.category.Category(vv, categorySeq))
     }
+  }
+
+  def addHome() = Action { implicit req =>
+    val vv = ViewValueHome(
+      title = "Category追加", 
+      cssSrc = Seq("main.css"), 
+      jsSrc  = Seq("main.js"), 
+    )
+    Ok(views.html.category.add(vv, addCategoryForm))
+  }
+
+  def add() = Action.async { implicit request => 
+    addCategoryForm.bindFromRequest.fold(
+      formWithErrors => {
+        val vv = ViewValueHome(
+          title = "Category追加", 
+          cssSrc = Seq("main.css"), 
+          jsSrc  = Seq("main.js"), 
+        )
+        Future.successful(BadRequest(views.html.category.add(vv, formWithErrors)))
+      }, 
+      categoryData => {
+        val categoryWithNoId: TodoCategory#WithNoId = TodoCategory.apply(
+          name       = categoryData.name, 
+          slug       = categoryData.slug, 
+          color      = categoryData.color
+        )
+        TodoCategoryRepository.add(categoryWithNoId).map(_ => 
+          Redirect(routes.CategoryController.getList)  
+        )
+      }
+    )
   }
 }
 
