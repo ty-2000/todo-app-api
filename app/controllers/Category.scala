@@ -118,12 +118,12 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
               )
             )
           }
-          _ <- newTodoCategoryOpt match {
-            case Some(newTodoCategory) => TodoCategoryRepository.update(newTodoCategory)
-            case None                  => Future.successful(None)
+          res <- newTodoCategoryOpt match {
+            case Some(newTodoCategory) => TodoCategoryRepository.update(newTodoCategory).map(_ => Redirect(routes.CategoryController.getList))
+            case None                  => Future.successful(None).map(_ => Ok(views.html.category.ErrorEdit()))
           }
         }yield{
-            Redirect(routes.CategoryController.getList)
+            res
         }
       }
     )
