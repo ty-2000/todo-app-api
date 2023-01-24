@@ -128,5 +128,22 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
       }
     )
   }
+  
+  def delete(id: Int) = Action.async { implicit req => 
+    val categoryId = TodoCategory.Id(id)
+    val deletedTodoSeqFuture = for {
+      oldTodoSeq <- TodoRepository.getByCategoryId(categoryId)
+      deletedTodoSeq <- Future.sequence(oldTodoSeq.map(oldTodo => TodoRepository.remove(oldTodo.id)))
+    } yield {
+      deletedTodoSeq
+    }
+    val deletedTodoCategoryFuture = TodoCategoryRepository.remove(categoryId)
+    for {
+      deletedTodoSeq <- deletedTodoSeqFuture
+      deletedTodoCategory <- deletedTodoCategoryFuture
+    } yield {
+      Redirect(routes.CategoryController.getList)
+    }
+  }
 }
 
