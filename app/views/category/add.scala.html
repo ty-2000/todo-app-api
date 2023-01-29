@@ -5,11 +5,11 @@
 
 @common.Default(vv){
 
-  @helper.form( action = helper.CSRF( routes.CategoryController.add) ){
+  @helper.form( action = helper.CSRF( routes.CategoryController.addCategory) ){
     @helper.inputText(addCategoryForm("name"), '_label -> "名前")
     @helper.inputText(addCategoryForm("slug"), '_label -> "Slug")
     @helper.inputRadioGroup(addCategoryForm("color"), options = lib.model.TodoCategory.Color.values.toSeq.map(c => (c.code.toString, c.name)), '_label -> "色")
     <input type="submit" value="追加">
   }
-  <a href="@{routes.CategoryController.getList}"><span>戻る</span></a>
+  <a href="@{routes.CategoryController.getCategoryList}"><span>戻る</span></a>
 }

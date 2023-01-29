@@ -1,7 +1,7 @@
 import sbt.Keys._
 import sbt._
 
-name := """to-do-sample"""
+name := """to-do-api"""
 organization := "com.example"
 
 version := "1.0-SNAPSHOT"
