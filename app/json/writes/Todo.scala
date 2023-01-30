@@ -20,7 +20,7 @@ case class JsValueTodoListItem(
   title:      String,
   body:       String,
   state:      JsValueStatus,
-  categoryId: Long
+  category_id: Long
 )
 object JsValueTodoListItem {
   implicit val writes: Writes[JsValueTodoListItem] = Json.writes[JsValueTodoListItem]
@@ -31,7 +31,7 @@ object JsValueTodoListItem {
       title    = todo.v.title,
       body     = todo.v.body,
       state    = JsValueStatus(todo.v.state),
-      categoryId = todo.v.categoryId.toLong
+      category_id = todo.v.categoryId.toLong
     )
 }
 
