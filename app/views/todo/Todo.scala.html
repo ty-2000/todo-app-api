@@ -11,7 +11,7 @@
       <th>タイトル</th>
       <th>詳細</th>
       <th>ステータス</th>
-      <th>カテゴリ<a href="@{routes.CategoryController.getList}"><span>詳細</span></a></th>
+      <th>カテゴリ<a href="@{routes.CategoryController.getCategoryList}"><span>詳細</span></a></th>
       <th> </th>
       <th> </th>
     </tr>
@@ -21,9 +21,9 @@
         <td>@Html(todoWithCategory.todo.v.body.replaceAll("(\r\n|\r|\n)","<br>"))</td>
         <td>@todoWithCategory.todo.v.state.name</td>
         <td>@todoWithCategory.category.v.name</td>
-        <td><a href="@{routes.HomeController.editTodoHome(todoWithCategory.todo.id.toInt)}"><span>編集</span></a></td>
+        <td><a href="@{routes.TodoController.getTodo(todoWithCategory.todo.id.toInt)}"><span>編集</span></a></td>
         <td>
-          @helper.form( action = helper.CSRF( routes.HomeController.deleteTodo(todoWithCategory.todo.id.toInt) ) ){
+          @helper.form( action = helper.CSRF( routes.TodoController.deleteTodo(todoWithCategory.todo.id.toInt) ) ){
             <input type="submit" value="削除">
           }
         </td>
@@ -33,7 +33,7 @@
 
   <h2>Add Todo</h2>
 
-  @helper.form( action = helper.CSRF( routes.HomeController.addTodo ) ){
+  @helper.form( action = helper.CSRF( routes.TodoController.addTodo ) ){
     @helper.select(field = addTodoForm("categoryId"), options = categorySeq.map(categoryEntity => (categoryEntity.id.toString, categoryEntity.v.name)), '_label -> "カテゴリ")
     @helper.inputText(addTodoForm("title"), '_label -> "タイトル")
     @helper.textarea(addTodoForm("body"), '_label -> "詳細")

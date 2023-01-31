@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton
 class CategoryController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
 
-  def getList() = Action.async { implicit req =>
+  def getCategoryList() = Action.async { implicit req =>
     val vv = ViewValueHome(
       title = "カテゴリ一覧", 
       cssSrc = Seq("main.css"), 
@@ -38,39 +38,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
     }
   }
 
-  def addHome() = Action { implicit req =>
-    val vv = ViewValueHome(
-      title = "Category追加", 
-      cssSrc = Seq("main.css"), 
-      jsSrc  = Seq("main.js"), 
-    )
-    Ok(views.html.category.add(vv, addCategoryForm))
-  }
-
-  def add() = Action.async { implicit request => 
-    addCategoryForm.bindFromRequest.fold(
-      formWithErrors => {
-        val vv = ViewValueHome(
-          title = "Category追加", 
-          cssSrc = Seq("main.css"), 
-          jsSrc  = Seq("main.js"), 
-        )
-        Future.successful(BadRequest(views.html.category.add(vv, formWithErrors)))
-      }, 
-      categoryData => {
-        val categoryWithNoId: TodoCategory#WithNoId = TodoCategory.apply(
-          name       = categoryData.name, 
-          slug       = categoryData.slug, 
-          color      = categoryData.color
-        )
-        TodoCategoryRepository.add(categoryWithNoId).map(_ => 
-          Redirect(routes.CategoryController.getList)  
-        )
-      }
-    )
-  }
-
-  def editHome(id: Int) = Action.async { implicit req => 
+  def getCategory(id: Int) = Action.async { implicit req => 
     val vv = ViewValueHome(
       title  = "Category 編集", 
       cssSrc =  Seq("main.css"), 
@@ -79,7 +47,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
 
     TodoCategoryRepository.get(TodoCategory.Id(id)).map{ 
       _ match {
-        case None               => Redirect(routes.CategoryController.getList)
+        case None               => Redirect(routes.CategoryController.getCategoryList)
         case Some(todoCategory) => {
           val filledEditTodoForm = editCategoryForm.fill(
             forms.EditCategoryData(
@@ -89,14 +57,45 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
               color = todoCategory.v.color
             )
           )
-          Ok(views.html.category.edit(vv, filledEditTodoForm))
+          Ok(views.html.category.Edit(vv, filledEditTodoForm))
         }
       }
     }
-
   }
 
-  def edit() = Action.async {implicit req => 
+  def addCategoryHome() = Action { implicit req =>
+    val vv = ViewValueHome(
+      title = "Category追加", 
+      cssSrc = Seq("main.css"), 
+      jsSrc  = Seq("main.js"), 
+    )
+    Ok(views.html.category.Add(vv, addCategoryForm))
+  }
+
+  def addCategory() = Action.async { implicit request => 
+    addCategoryForm.bindFromRequest.fold(
+      formWithErrors => {
+        val vv = ViewValueHome(
+          title = "Category追加", 
+          cssSrc = Seq("main.css"), 
+          jsSrc  = Seq("main.js"), 
+        )
+        Future.successful(BadRequest(views.html.category.Add(vv, formWithErrors)))
+      }, 
+      categoryData => {
+        val categoryWithNoId: TodoCategory#WithNoId = TodoCategory.apply(
+          name       = categoryData.name, 
+          slug       = categoryData.slug, 
+          color      = categoryData.color
+        )
+        TodoCategoryRepository.add(categoryWithNoId).map(_ => 
+          Redirect(routes.CategoryController.getCategoryList)  
+        )
+      }
+    )
+  }
+
+  def editCategory() = Action.async {implicit req => 
     editCategoryForm.bindFromRequest.fold(
       formWithErrors => {
         val vv = ViewValueHome(
@@ -104,7 +103,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
           cssSrc = Seq("main.css"), 
           jsSrc  = Seq("main.js"), 
         )
-        Future.successful(BadRequest(views.html.category.edit(vv, formWithErrors)))
+        Future.successful(BadRequest(views.html.category.Edit(vv, formWithErrors)))
       }, 
       categoryData => {
         for {
@@ -119,7 +118,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
             )
           }
           res <- newTodoCategoryOpt match {
-            case Some(newTodoCategory) => TodoCategoryRepository.update(newTodoCategory).map(_ => Redirect(routes.CategoryController.getList))
+            case Some(newTodoCategory) => TodoCategoryRepository.update(newTodoCategory).map(_ => Redirect(routes.CategoryController.getCategoryList))
             case None                  => Future.successful(None).map(_ => Ok(views.html.category.ErrorEdit()))
           }
         }yield{
@@ -129,7 +128,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
     )
   }
   
-  def delete(id: Int) = Action.async { implicit req => 
+  def deleteCategory(id: Int) = Action.async { implicit req => 
     val categoryId = TodoCategory.Id(id)
     val deletedTodoSeqFuture = for {
       oldTodoSeq <- TodoRepository.getByCategoryId(categoryId)
@@ -142,7 +141,7 @@ class CategoryController @Inject()(val controllerComponents: ControllerComponent
       deletedTodoSeq <- deletedTodoSeqFuture
       deletedTodoCategory <- deletedTodoCategoryFuture
     } yield {
-      Redirect(routes.CategoryController.getList)
+      Redirect(routes.CategoryController.getCategoryList)
     }
   }
 }

@@ -8,9 +8,6 @@ package controllers
 
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
-import scala.util.Failure
-
 
 import javax.inject._
 import play.api.i18n.I18nSupport
@@ -29,16 +26,15 @@ import play.api.data.Forms._
 import forms.AddTodoForm.addTodoForm
 import forms.EditTodoForm.editTodoForm
 
-@Singleton
-class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
+import play.api.libs.json.Json
+import json.writes.JsValueCategoryListItem
 
-  def index() = Action { implicit req =>
-    val vv = ViewValueHome(
-      title  = "Home",
-      cssSrc = Seq("main.css"),
-      jsSrc  = Seq("main.js")
+@Singleton
+class CategoryApiController @Inject()(val controllerComponents: ControllerComponents) extends BaseController with I18nSupport {
+  def index() = Action.async { implicit req => 
+    TodoCategoryRepository.getAll().map(categorySeq => 
+      Ok(Json.toJson(categorySeq.map(category => JsValueCategoryListItem(category))))
     )
-    Ok(views.html.Home(vv))
   }
 }
 
