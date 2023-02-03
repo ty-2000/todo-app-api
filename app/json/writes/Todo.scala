@@ -33,5 +33,15 @@ object JsValueTodoListItem {
       state    = JsValueStatus(todo.v.state),
       category_id = todo.v.categoryId.toLong
     )
+
+  def apply(todo: Todo.WithNoId, id: Int): JsValueTodoListItem = {
+    JsValueTodoListItem(
+      id       = id,
+      title    = todo.v.title,
+      body     = todo.v.body,
+      state    = JsValueStatus(todo.v.state),
+      category_id = todo.v.categoryId.toLong
+    )
+  }
 }
 
