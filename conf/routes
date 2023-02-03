@@ -20,6 +20,7 @@ POST    /category/edit                controllers.CategoryController.editCategor
 POST    /category/delete/:id          controllers.CategoryController.deleteCategory(id: Int)
 
 GET     /api/todos                    controllers.TodoApiController.index
+POST    /api/todos                    controllers.TodoApiController.add
 
 GET     /api/categories               controllers.CategoryApiController.index
 # Map static resources from the /public folder to the /assets URL path
