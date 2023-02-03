@@ -38,6 +38,15 @@ class TodoApiController @Inject()(val controllerComponents: ControllerComponents
     )
   }
 
+  def get(id: Int) = Action.async { implicit req => 
+    TodoRepository.get(Todo.Id(id)).map( todoOpt => 
+      todoOpt match {
+        case Some(todo) => Ok(Json.toJson(JsValueTodoListItem(todo)))
+        case None       => Ok(Json.toJson(s"error: Todo with id:{$id} does not exist"))
+      }
+    )
+  }
+
   def add() = Action(parse.json).async { implicit req => 
     req.body
       .validate[JsValueCreateTodo]
